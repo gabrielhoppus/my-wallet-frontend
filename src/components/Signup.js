@@ -1,47 +1,92 @@
 import styled from "styled-components"
 import { Link, useNavigate } from "react-router-dom";
+import { ThreeDots } from "react-loader-spinner";
+import { useState, useContext } from "react";
+import axios from "axios";
+import { UserContext } from "./UserContext";
 
 function Signup() {
+    const [password, setPassword] = useState("");
+    const [email, setEmail] = useState("");
+    const [confirmation, setConfirmation] = useState("");
+    const [disableInput, setDisableInput] = useState(false);
+    const { name, setName } = useContext(UserContext);
+    const navigate = useNavigate();
+
+    function userSignup(e) {
+        setDisableInput(true);
+        e.preventDefault();
+        const body = { name, email, password, confirmation };
+        axios.post(`${process.env.REACT_APP_API_URL}/users`, body)
+            .then(() => {
+                alert("Cadastro realizado com sucesso!");
+                navigate("/");
+            })
+            .catch((err) => {
+                alert(err.message);
+                setDisableInput(false);
+            });
+    }
+
     return (
         <Container>
             <Header>
                 <p>MyWallet</p>
             </Header>
-            <LoginForm>
+            <LoginForm onSubmit={userSignup} >
                 <label htmlFor="name">
                     <LoginInput
+                        disabled={disableInput}
                         id="name"
                         type="text"
                         placeholder="Nome"
+                        value={name}
+                        onChange={e => setName(e.target.value)}
                         required
                     />
                 </label>
                 <label htmlFor="email">
                     <LoginInput
+                        disabled={disableInput}
                         id="email"
                         type="email"
                         placeholder="E-mail"
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
                         required
                     />
                 </label>
                 <label htmlFor="password">
                     <LoginInput
+                        disabled={disableInput}
                         id="password"
                         type="password"
                         placeholder="Senha"
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
+                        autocomplete="chrome-off"
                         required
                     />
                 </label>
                 <label htmlFor="password_check">
                     <LoginInput
-                        id="password"
+                        disabled={disableInput}
+                        id="password_check"
                         type="password"
                         placeholder="Confirme a senha"
+                        value={confirmation}
+                        onChange={e => setConfirmation(e.target.value)}
+                        autocomplete="chrome-off"
                         required
                     />
                 </label>
-                <LoginButton type="submit">
-                    Cadastrar
+                <LoginButton type="submit" disabled={disableInput}>
+                    {disableInput ? <ThreeDots
+                        height="13"
+                        width="51"
+                        color="#FFFFFF"
+                    /> :
+                        "Cadastrar"}
                 </LoginButton>
             </LoginForm>
             <StyledLink to={`/`}>
@@ -70,9 +115,12 @@ const Header = styled.div`
     margin: 0px auto 28px auto;
     font-size: 32px;
     color: #FFFFFF;
+    p {
+        font-family: 'Saira Stencil One';
+    }
 `;
 
-const LoginForm = styled.div`
+const LoginForm = styled.form`
     width: 326px;
     margin-left: auto;
     margin-right: auto;

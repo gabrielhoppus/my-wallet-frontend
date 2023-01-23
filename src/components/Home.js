@@ -1,35 +1,105 @@
+import { useEffect, useContext, useState } from "react";
+import { UserContext } from "./UserContext";
 import styled from "styled-components";
-import { Link, useNavigate} from "react-router-dom";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import Exit from "../assets/exit.png";
 import Plus from "../assets/plus.png";
 import Minus from "../assets/minus.png";
 
 function Home() {
     const navigate = useNavigate();
+    const { name, token, setType } = useContext(UserContext);
+    const [transaction, setTransaction] = useState([]);
+    const [total, setTotal] = useState(0)
+    const [balance, setBalance] = useState("")
 
-    function newEntry(){
+    useEffect(() => {
+        const config = {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        };
+
+        axios.get(`${process.env.REACT_APP_API_URL}/transactions`, config)
+            .then((res) => {
+                setTransaction(res.data);
+                if (transaction && Array.isArray(transaction) && transaction.length > 0) {
+                    getTotal()
+                }
+            })
+            .catch((err) => {
+                console.log(err.message);
+            });
+
+    }, [transaction]);
+
+    function getTotal() {
+        let filanSaldo = 0
+        transaction.map((s) => s.type === 'exit' ? filanSaldo -= Number(s.amount) : filanSaldo += Number(s.amount))
+        setTotal(filanSaldo.toFixed(2))
+        setBalance(total.toString().replace(".", ","))
+    }
+
+
+    function newEntry() {
+        setType("entry")
         navigate("/nova-entrada")
     }
 
-    function newExit(){
-        navigate("/nova-saida")
+    function newWithdrawal() {
+        setType("exit")
+        navigate("/nova-entrada")
+    }
+
+    function endSession() {
+        const config = {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }
+
+        axios.delete(`${process.env.REACT_APP_API_URL}/sessions`, config)
+
+        navigate("/")
     }
 
     return (
         <Container>
             <Header>
-                <p>Olá, Fulano</p>
-                <ExitIcon src={Exit} alt="exit-icon" />
+                <p>Olá, {name}</p>
+                <ExitIcon src={Exit} alt="exit-icon" onClick={endSession} />
             </Header>
             <Body>
-                <p>Não há registros de entrada ou saída</p>
+                <ValuesContainer>
+                    {transaction.map((transaction) =>
+                        <TransactionContainer key={transaction._id}>
+                            <LeftContainer>
+                                <Date>
+                                    {transaction.date}
+                                </Date>
+                                {transaction.description}
+                            </LeftContainer>
+                            <RightContainer color={transaction.type === "entry" ? "#03AC00" : "#C70000"}>
+                                {transaction.amount.replace(".", ",")}
+                            </RightContainer>
+                        </TransactionContainer>,
+                    )}
+                </ValuesContainer>
+
+                <TotalHeader>Saldo</TotalHeader>
+                <TotalContainer color={total >= 0 ? "#03AC00" : "#C70000"}>
+                    {balance}
+                </TotalContainer>
+
+
             </Body>
             <Footer>
                 <StyledButton onClick={newEntry}>
                     <Icon src={Plus} alt="plus-icon" />
                     <p>Nova entrada</p>
                 </StyledButton>
-                <StyledButton onClick={newExit}>
+                <StyledButton onClick={newWithdrawal}>
                     <Icon src={Minus} alt="minus-icon" />
                     <p>Nova saída</p>
                 </StyledButton>
@@ -39,6 +109,57 @@ function Home() {
 }
 
 export default Home;
+
+
+const ValuesContainer = styled.div`
+    height: 400px;
+    overflow: scroll;
+`;
+
+const TotalHeader = styled.div`
+    position: absolute;
+    bottom: 10px;
+    left: 15px;
+    font-weight: 700;
+    font-size: 17px;
+    color: #000000;
+`;
+
+const TotalContainer = styled.div`
+    position: absolute;
+    bottom: 10px;
+    right: 15px;
+    color: ${props => props.color};
+`;
+
+const RightContainer = styled.div`
+    padding-right: 11px;
+    font-size: 16px;
+    color: ${props => props.color};
+`;
+
+const TransactionContainer = styled.div`
+    display: flex;
+    justify-content: space-between;
+    margin-top: 23px;
+`;
+
+const Date = styled.div`
+    min-width: 48px;
+    font-weight: 400;
+    font-size: 16px;
+    color: #C6C6C6;
+`;
+
+const LeftContainer = styled.div`
+    display: flex;
+    max-width: 250px;
+    margin-left: 12px;
+    grid-gap: 10px;
+    font-weight: 400;
+    font-size: 16px;
+    color: #000000;
+`;
 
 const Container = styled.div`
     display: flex;
@@ -55,6 +176,8 @@ const Header = styled.div`
     align-items: center;
     padding-top: 25px;
     margin-bottom: 22px;
+    margin-left: auto;
+    margin-right: auto;
     p {
         margin-left: 24px;
         font-weight: 700;
@@ -77,9 +200,8 @@ const Body = styled.div`
     margin-right: auto;
     background: #FFFFFF;
     border-radius: 5px;
-    text-align: center;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column;
+    position: relative;
     p {
         width: 180px;
         height: 46px;

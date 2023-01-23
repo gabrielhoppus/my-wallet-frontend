@@ -1,27 +1,31 @@
 import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
+import { UserContext } from "./UserContext";
 import { useState, useContext } from "react";
-import { Link, useNavigate } from "react-router-dom";
 import { ThreeDots } from "react-loader-spinner";
 import axios from "axios";
-import { UserContext } from "./UserContext";
 
-function LoginScreen() {
-    const [password, setPassword] = useState("");
-    const [email, setEmail] = useState("");
-    const [disableInput, setDisableInput] = useState(false);
+function NewEntry() {
     const navigate = useNavigate();
-    const { setName, setToken } = useContext(UserContext);
+    const { token, type } = useContext(UserContext);
+    const [amount, setAmount] = useState("");
+    const [description, setDescription] = useState("");
+    const [disableInput, setDisableInput] = useState(false);
+    const config = {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    };
+    const body = { amount, description, type }
 
-    function userLogin(e) {
+    function saveEntry(e) {
         setDisableInput(true);
         e.preventDefault();
-        const body = { email, password };
 
-        axios.post(`${process.env.REACT_APP_API_URL}/sessions`, body)
-            .then((res) => {
+        axios.post(`${process.env.REACT_APP_API_URL}/transactions`, body, config)
+            .then(() => {
+                alert("Transação efetuada com sucesso");
                 navigate("/home");
-                setToken(res.data.token);
-                setName(res.data.name)
             })
             .catch((err) => {
                 alert(err.message);
@@ -32,50 +36,48 @@ function LoginScreen() {
     return (
         <Container>
             <Header>
-                <p>MyWallet</p>
+                <p>
+                    {type === "entry" ? "Nova Entrada" : "Nova Saída"}
+                </p>
             </Header>
-            <LoginForm onSubmit={userLogin}>
-                <label htmlFor="email">
+            <LoginForm onSubmit={saveEntry}>
+                <label htmlFor="amount">
                     <LoginInput
                         disabled={disableInput}
-                        id="email"
-                        type="email"
-                        placeholder="email"
-                        value={email}
-                        onChange={e => setEmail(e.target.value)}
+                        id="amount"
+                        type="number"
+                        placeholder="Valor"
+                        value={amount}
+                        onChange={e => setAmount(e.target.value)}
                         required
                     />
                 </label>
-                <label htmlFor="password">
+                <label htmlFor="description">
                     <LoginInput
                         disabled={disableInput}
-                        id="password"
-                        type="password"
-                        placeholder="senha"
-                        value={password}
-                        onChange={e => setPassword(e.target.value)}
+                        id="description"
+                        type="text"
+                        placeholder="Descrição"
+                        value={description}
+                        onChange={e => setDescription(e.target.value)}
                         required
                     />
                 </label>
-                <LoginButton type="submit">
+                <LoginButton type="submit" disabled={disableInput}>
                     {disableInput ? <ThreeDots
                         height="13"
                         width="51"
                         color="#FFFFFF"
                     /> :
-                        "Entrar"}
+                    type === "entry" ? "Salvar Entrada" : "Salvar Saída"}
                 </LoginButton>
             </LoginForm>
-            <StyledLink to={`/cadastro`}>
-                <div>
-                    Primeira vez? Cadastre-se!
-                </div>
-            </StyledLink>
         </Container>
     )
 }
 
-export default LoginScreen;
+
+export default NewEntry;
 
 const Container = styled.div`
     display: flex;
@@ -86,14 +88,17 @@ const Container = styled.div`
 `;
 
 const Header = styled.div`
-    
-    width: 147px;
-    padding-top: 159px;
-    margin: 0px auto 24px auto;
-    font-size: 32px;
-    color: #FFFFFF;
+    width: 375px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 25px;
+    margin-bottom: 40px;
     p {
-        font-family: 'Saira Stencil One';
+        margin-left: 24px;
+        font-weight: 700;
+        font-size: 26px;
+        color: #FFFFFF;
     }
 `;
 
@@ -114,6 +119,18 @@ const LoginInput = styled.input`
     border: none;
     margin-bottom: 13px;
     padding-left: 15px;
+    ::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    ::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+        }
+
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
     ::placeholder {
         color: #000000;
     }
@@ -139,16 +156,4 @@ const LoginButton = styled.button`
     color: #FFFFFF;
     font-weight: 700;
     font-size: 20px;
-`;
-
-const StyledLink = styled(Link)`
-    margin-left: auto;
-    margin-right: auto;
-    font-weight: 700;
-    font-size: 15px;
-    text-align: center;
-    color: #FFFFFF;
-    &:focus, &:hover, &:visited, &:link, &:active {
-        text-decoration: none;
-    }
 `;
