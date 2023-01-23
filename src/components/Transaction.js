@@ -16,7 +16,11 @@ function NewEntry() {
             Authorization: `Bearer ${token}`
         }
     };
-    const body = { amount, description, type }
+    const body = {
+        amount,
+        description,
+        type
+    };
 
     function saveEntry(e) {
         setDisableInput(true);
@@ -69,7 +73,7 @@ function NewEntry() {
                         width="51"
                         color="#FFFFFF"
                     /> :
-                    type === "entry" ? "Salvar Entrada" : "Salvar Saída"}
+                        type === "entry" ? "Salvar Entrada" : "Salvar Saída"}
                 </LoginButton>
             </LoginForm>
         </Container>

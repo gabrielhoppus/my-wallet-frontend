@@ -21,7 +21,7 @@ function LoginScreen() {
             .then((res) => {
                 navigate("/home");
                 setToken(res.data.token);
-                setName(res.data.name)
+                setName(res.data.name);
             })
             .catch((err) => {
                 alert(err.message);
@@ -40,7 +40,7 @@ function LoginScreen() {
                         disabled={disableInput}
                         id="email"
                         type="email"
-                        placeholder="email"
+                        placeholder="E-mail"
                         value={email}
                         onChange={e => setEmail(e.target.value)}
                         required
@@ -51,7 +51,7 @@ function LoginScreen() {
                         disabled={disableInput}
                         id="password"
                         type="password"
-                        placeholder="senha"
+                        placeholder="Senha"
                         value={password}
                         onChange={e => setPassword(e.target.value)}
                         required

@@ -11,8 +11,8 @@ function Home() {
     const navigate = useNavigate();
     const { name, token, setType } = useContext(UserContext);
     const [transaction, setTransaction] = useState([]);
-    const [total, setTotal] = useState(0)
-    const [balance, setBalance] = useState("")
+    const [total, setTotal] = useState(0);
+    const [balance, setBalance] = useState("");
 
     useEffect(() => {
         const config = {
@@ -25,31 +25,31 @@ function Home() {
             .then((res) => {
                 setTransaction(res.data);
                 if (transaction && Array.isArray(transaction) && transaction.length > 0) {
-                    getTotal()
+                    getTotal();
                 }
             })
             .catch((err) => {
                 console.log(err.message);
             });
 
-    }, [transaction]);
+    }, [transaction, token]);
 
     function getTotal() {
-        let filanSaldo = 0
-        transaction.map((s) => s.type === 'exit' ? filanSaldo -= Number(s.amount) : filanSaldo += Number(s.amount))
-        setTotal(filanSaldo.toFixed(2))
-        setBalance(total.toString().replace(".", ","))
+        let userBalance = 0;
+        transaction.map((t) => t.type === "exit" ? userBalance -= Number(t.amount) : userBalance += Number(t.amount));
+        setTotal(userBalance.toFixed(2));
+        setBalance(total.toString().replace(".", ","));
     }
 
 
     function newEntry() {
-        setType("entry")
-        navigate("/nova-entrada")
+        setType("entry");
+        navigate("/nova-entrada");
     }
 
     function newWithdrawal() {
-        setType("exit")
-        navigate("/nova-entrada")
+        setType("exit");
+        navigate("/nova-entrada");
     }
 
     function endSession() {
@@ -57,11 +57,16 @@ function Home() {
             headers: {
                 Authorization: `Bearer ${token}`
             }
-        }
+        };
 
         axios.delete(`${process.env.REACT_APP_API_URL}/sessions`, config)
-
-        navigate("/")
+        .then(() => {
+            navigate("/");
+        })
+        .catch((err) => {
+            console.log(err.message)
+        })
+        
     }
 
     return (
@@ -72,27 +77,28 @@ function Home() {
             </Header>
             <Body>
                 <ValuesContainer>
-                    {transaction.map((transaction) =>
-                        <TransactionContainer key={transaction._id}>
-                            <LeftContainer>
-                                <Date>
-                                    {transaction.date}
-                                </Date>
-                                {transaction.description}
-                            </LeftContainer>
-                            <RightContainer color={transaction.type === "entry" ? "#03AC00" : "#C70000"}>
-                                {transaction.amount.replace(".", ",")}
-                            </RightContainer>
-                        </TransactionContainer>,
-                    )}
+                    {transaction.length > 0 ?
+                        transaction.map((transaction) =>
+                            <TransactionContainer key={transaction._id}>
+                                <LeftContainer>
+                                    <Date>
+                                        {transaction.date}
+                                    </Date>
+                                    {transaction.description}
+                                </LeftContainer>
+                                <RightContainer color={transaction.type === "entry" ? "#03AC00" : "#C70000"}>
+                                    {transaction.amount.replace(".", ",")}
+                                </RightContainer>
+                            </TransactionContainer>,
+                        ) : <EmptyTransaction>Não há registros de entrada ou saída</EmptyTransaction>}
                 </ValuesContainer>
-
-                <TotalHeader>Saldo</TotalHeader>
-                <TotalContainer color={total >= 0 ? "#03AC00" : "#C70000"}>
-                    {balance}
-                </TotalContainer>
-
-
+                {transaction.length > 0 ?
+                    <>
+                        <TotalHeader>Saldo</TotalHeader>
+                        <TotalContainer color={total >= 0 ? "#03AC00" : "#C70000"}>
+                            {balance ? balance : "0,00"}
+                        </TotalContainer>
+                    </> : <></>}
             </Body>
             <Footer>
                 <StyledButton onClick={newEntry}>
@@ -110,6 +116,19 @@ function Home() {
 
 export default Home;
 
+const EmptyTransaction = styled.div`
+    width: 180px;
+    font-weight: 400;
+    font-size: 20px;
+    display: flex;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    margin-top: 200px;
+    color: #868686;
+    margin-left: auto;
+    margin-right: auto;
+`;
 
 const ValuesContainer = styled.div`
     height: 400px;
@@ -190,7 +209,7 @@ const ExitIcon = styled.img`
     width: 23px;
     height: 24px;
     margin-right: 24px;
-`
+`;
 
 const Body = styled.div`
     width: 326px;

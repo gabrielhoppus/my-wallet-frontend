@@ -10,7 +10,7 @@ import Transaction from "./Transaction";
 function App() {
   const [token, setToken] = useState("");
   const [name, setName] = useState("");
-  const [type, setType] = useState("")
+  const [type, setType] = useState("");
 
   return (
     <BrowserRouter>

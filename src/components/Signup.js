@@ -1,4 +1,4 @@
-import styled from "styled-components"
+import styled from "styled-components";
 import { Link, useNavigate } from "react-router-dom";
 import { ThreeDots } from "react-loader-spinner";
 import { useState, useContext } from "react";
@@ -10,24 +10,26 @@ function Signup() {
     const [email, setEmail] = useState("");
     const [confirmation, setConfirmation] = useState("");
     const [disableInput, setDisableInput] = useState(false);
-    const { name, setName } = useContext(UserContext);
+    const [user, setUser] = useState("");
+    const { setName } = useContext(UserContext);
     const navigate = useNavigate();
 
     function userSignup(e) {
+        
         setDisableInput(true);
         e.preventDefault();
-        const body = { name, email, password, confirmation };
+        const body = { name: user, email, password, confirmation };
         axios.post(`${process.env.REACT_APP_API_URL}/users`, body)
             .then(() => {
                 alert("Cadastro realizado com sucesso!");
                 navigate("/");
+                setName(user);
             })
             .catch((err) => {
                 alert(err.message);
                 setDisableInput(false);
             });
     }
-
     return (
         <Container>
             <Header>
@@ -40,8 +42,8 @@ function Signup() {
                         id="name"
                         type="text"
                         placeholder="Nome"
-                        value={name}
-                        onChange={e => setName(e.target.value)}
+                        value={user}
+                        onChange={e => setUser(e.target.value)}
                         required
                     />
                 </label>
