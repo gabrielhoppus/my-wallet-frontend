@@ -67,14 +67,14 @@ function NewEntry() {
                         required
                     />
                 </label>
-                <LoginButton type="submit" disabled={disableInput}>
+                <ApplyButton type="submit" disabled={disableInput}>
                     {disableInput ? <ThreeDots
                         height="13"
                         width="51"
                         color="#FFFFFF"
                     /> :
                         type === "entry" ? "Salvar Entrada" : "Salvar Saída"}
-                </LoginButton>
+                </ApplyButton>
             </LoginForm>
         </Container>
     )
@@ -150,7 +150,7 @@ const LoginInput = styled.input`
     }
 `;
 
-const LoginButton = styled.button`
+const ApplyButton = styled.button`
     width: 326px;
     height: 46px;
     margin-bottom: 36px;
@@ -160,4 +160,8 @@ const LoginButton = styled.button`
     color: #FFFFFF;
     font-weight: 700;
     font-size: 20px;
+    display: flex;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
 `;

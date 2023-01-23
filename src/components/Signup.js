@@ -82,14 +82,14 @@ function Signup() {
                         required
                     />
                 </label>
-                <LoginButton type="submit" disabled={disableInput}>
+                <RegisterButton type="submit" disabled={disableInput}>
                     {disableInput ? <ThreeDots
                         height="13"
                         width="51"
                         color="#FFFFFF"
                     /> :
                         "Cadastrar"}
-                </LoginButton>
+                </RegisterButton>
             </LoginForm>
             <StyledLink to={`/`}>
                 <div>
@@ -154,7 +154,7 @@ const LoginInput = styled.input`
     }
 `;
 
-const LoginButton = styled.button`
+const RegisterButton = styled.button`
     width: 326px;
     height: 46px;
     margin-bottom: 32px;
@@ -164,6 +164,10 @@ const LoginButton = styled.button`
     color: #FFFFFF;
     font-weight: 700;
     font-size: 20px;
+    display: flex;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
 `;
 
 const StyledLink = styled(Link)`

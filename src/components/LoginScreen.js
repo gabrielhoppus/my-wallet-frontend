@@ -139,6 +139,10 @@ const LoginButton = styled.button`
     color: #FFFFFF;
     font-weight: 700;
     font-size: 20px;
+    display: flex;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
 `;
 
 const StyledLink = styled(Link)`
